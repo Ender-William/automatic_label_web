@@ -100,6 +100,19 @@ class DBUtils:
         else:
             return data_list[0]['credits']
 
+    def update_credits(self, username, credits):
+        """
+        更新指定用户的积分
+        :param username:
+        :param credits:
+        :return:
+        """
+        sql = "update credits set credits = %s where username = %s"
+        self.cursor.execute(sql, [credits, username])
+        self.conn.commit()
+
+    def get_model(self):
+        sql = ''
 
     def close(self):
         # 关闭 SQL 链接

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-
+import threadUtil
 import PySimpleGUI as sg
 from configobj import ConfigObj
 
@@ -18,6 +18,28 @@ if 'LOGIN_INFO' in cfg:
 else:
     cfg['LOGIN_INFO'] = {}
 
+def getAllFilePath(path: str) -> list:
+    """
+    获取输入路径下的全部的文件的路径
+    :param path: str 要检索的路径
+    :return: list 返回包含有文件路径的列表
+    """
+    scan_path = path  # 设置扫描路径
+    cur_file_list = os.listdir(scan_path)  # 获取当前目录下的全部路径
+    main_file_list = []  # 目录下的所有文件的路径
+    for item in cur_file_list:
+        # 遍历当前路径下的文件列表中的路径，判断是路径还是文件
+        cur_path = os.path.join(scan_path, item)  # 组合路径
+        if os.path.isdir(cur_path):
+            # 如果是一个路径
+            inner_list = getAllFilePath(cur_path)  # 递归获取文件地址
+            for inner_item in inner_list:
+                main_file_list.append(inner_item)  # 将递归后获取的文件地址加入到主文件路径列表
+            inner_list = None  # 释放空间
+        else:
+            main_file_list.append(cur_path)
+    # pmrutils.logUtil.LogSys().show_info(scan_path + " Scan Finish")
+    return main_file_list
 
 def login():
     """"""
@@ -62,10 +84,12 @@ models = ["1","2","3"]
 model_choice = [
     [sg.Text(text="请选择要使用的模型", size=(15,1), font='Default 20', text_color='Black', justification='left'),
      sg.Combo(models, size=(10,10), font='Default 20', default_value="1", key="-MODEL-"),
-     sg.Button('开始', font='Default 15', key='-START-'), sg.Button('停止', font='Default 15', key='-STOP-')],
+     sg.Button('开始', font='Default 15', disabled=True, key='-START-'),
+     sg.Button('停止', font='Default 15', disabled=True, key='-STOP-')],
 
     [sg.Text(text="选择待处理的文件集", size=(15,1), font='Default 20', text_color='Black', justification='left'),
-     sg.InputText(size=(15,1), font='Default 20', text_color='Black'),sg.FolderBrowse(key='PATH')]
+     sg.InputText(size=(10,1), font='Default 20', text_color='Black', key='-PATH-'),sg.FolderBrowse(),
+     sg.Button('检索', font='Default 15', key='-SCAN-')]
 ]
 progress_bar = [
     [sg.ProgressBar(max_value=100, orientation='h', size=(51, 62), key='progressbar')]
@@ -89,23 +113,62 @@ operate_area_layout = [
      sg.Frame(layout=processed_file, title='已处理文件',title_color='red', font='Default 10',relief=sg.RELIEF_SUNKEN)]
 ]
 
+def start_detect(path_list):
+    username = cfg['LOGIN_INFO']['USERNAME']
+    count_max = len(path_list[0])
+    index = 1
+    for pic_path in path_list[0]:
+        credits_info = service.get_credits(username)
+        window['-CREDITS-'].update(credits_info)
+        print(credits_info)
+        try:
+            result = service.get_detect(username, pic_path)
+        except Exception as e:
+            print(e)
+        progress = (index/count_max) * 100
+        # print(progress)
+        window['progressbar'].update(progress)
+        index = index + 1
+
 
 if __name__ == '__main__':
     login()
     # Create the window
-    window = sg.Window('Auto Label', operate_area_layout)
-    progress_bar = window['progressbar']
     username = cfg['LOGIN_INFO']['USERNAME']
-    # 获取积分信息
-    credits_info = service.get_credits(username)
+    Window_Name = "Auto Label | User: " + username
+    window = sg.Window(Window_Name, operate_area_layout)
+    progress_bar = window['progressbar']
+
+
     # Display and interact with the Window using an Event Loop
     while True:
+        # 获取积分信息
+        credits_info = service.get_credits(username)
         # time.sleep(1)
         event, values = window.read(timeout=10)
         window['-CREDITS-'].update(credits_info)
+
         # See if user wants to quit or window was closed
         if event == sg.WINDOW_CLOSED or event == 'Quit':
             break
+        if event == '-START-':
+            window['-STOP-'].update(disabled=False)
+            window['-START-'].update(disabled=True)
+            window['-SCAN-'].update(disabled=True)
+            target_path = window['-PATH-'].get()
+            file_list = getAllFilePath(target_path)
+            detect_thread = threadUtil.MyThread("detect",start_detect, [file_list])
+        if event == '-STOP-':
+            window['-STOP-'].update(disabled = True)
+            window['-START-'].update(disabled = False)
+            window['-SCAN-'].update(disabled=False)
+            threadUtil.stop_thread(detect_thread)
+        if event == '-SCAN-':
+            window['-START-'].update(disabled=False)
+            target_path = window['-PATH-'].get()
+            file_list = getAllFilePath(target_path)
+            window['-PREVIEW-'].update(file_list)
+
         # Output a message to the window
     # Finish up by removing from the screen
     window.close()

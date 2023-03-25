@@ -24,18 +24,31 @@ def login():
     DBUtil = bss.DBUtils()
 
     if DBUtil.login(username=username, passwd=passwd):
+        DBUtil.close()
         return {"login": "success"}
+    DBUtil.close()
     return {"login": "false"}
 
 @app.route('/getcredits', methods=['GET'])
 def getcredits():
     username = request.form.get('username')
     DBUtil = bss.DBUtils()
-    return DBUtil.get_credits(username=username)
+    credits = DBUtil.get_credits(username=username)
+    DBUtil.close()
+    return credits
 
 @app.route('/detect', methods=['POST'])
 def detect():
     img = request.form.get('img')
+    username = request.form.get('username')
+    DBUtil = bss.DBUtils()
+    credits = int(DBUtil.get_credits(username=username))
+    if credits == 0:
+        return []
+    else:
+        credits = credits - 1
+        DBUtil.update_credits(username=username, credits=credits)
+    DBUtil.close()
     image = base64.b64decode(img)
     img = cv2.imdecode(np.frombuffer(image, np.uint8), cv2.IMREAD_COLOR)
     with torch.no_grad():
@@ -47,7 +60,7 @@ def detect():
     print(recog_list)
     return recog_list
 
+
 if __name__ == '__main__':
     yolo_model = yolo_detectAPI.DetectAPI(weights='./weight/five_gesture.pt')
-
     app.run()
