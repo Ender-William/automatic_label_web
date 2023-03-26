@@ -112,7 +112,12 @@ class DBUtils:
         self.conn.commit()
 
     def get_model(self):
-        sql = ''
+        sql = 'select model from model'
+        self.cursor.execute(sql)
+        self.conn.commit()
+        data_list = self.cursor.fetchall()
+        return data_list
+
 
     def close(self):
         # 关闭 SQL 链接
