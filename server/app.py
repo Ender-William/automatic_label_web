@@ -75,7 +75,6 @@ def detect():
         return recog_list
 
 
-
 @app.route('/getweight', methods=['GET'])
 def get_weight():
     DBUtil = bss.DBUtils()

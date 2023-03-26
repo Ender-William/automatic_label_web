@@ -57,19 +57,20 @@ def login():
         [sg.InputText('', size=(30, 1), font='Default 20', text_color='Black', key='-USERNAME-')],
         [sg.Text(text="密码", size=(15, 1), font='Default 20', text_color='Black', justification='left')],
         [sg.InputText('', size=(30, 1), font='Default 20', text_color='Black', key='-PASSWD-', password_char='*')],
-        [sg.Button('登录', font='Default 15', key='-LOGIN-'), sg.Button('取消', font='Default 15')],
+        [sg.Button('登录', font='Default 15', key='-LOGIN-'), sg.Button('取消', font='Default 15', key='-QUIT-')],
         [sg.Text(text="2023 Copyright @ KD_Mercury", size=(25, 1), text_color='Black', justification='left'),
          sg.Text(text="http://blogs.kd-mercury.xyz", size=(23, 1), text_color='Black', justification='left')],
     ]
 
     window = sg.Window('Auto Label - Login', layout)
-
+    cfg['LOGIN_INFO']['USERNAME'] = ''
+    cfg.write()
     # Display and interact with the Window using an Event Loop
     while True:
         # time.sleep(1)
         event, values = window.read(timeout=10)
         # See if user wants to quit or window was closed
-        if event == sg.WINDOW_CLOSED or event == 'Quit':
+        if event == sg.WINDOW_CLOSED or event == '-QUIT-':
             break
         if event == "-LOGIN-":
             username = window['-USERNAME-'].get()
@@ -193,6 +194,8 @@ if __name__ == '__main__':
     window['-MODEL-'].update(values=weight)
     # Display and interact with the Window using an Event Loop
     while True:
+        if username == '':
+            break
         # 获取积分信息
         credits_info = service.get_credits(username)
         # time.sleep(1)
@@ -201,6 +204,8 @@ if __name__ == '__main__':
 
         # See if user wants to quit or window was closed
         if event == sg.WINDOW_CLOSED or event == 'Quit':
+            cfg['LOGIN_INFO']['USERNAME'] = ''
+            cfg.write()
             break
         if event == '-START-':
             try:
