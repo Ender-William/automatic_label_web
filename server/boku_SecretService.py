@@ -118,15 +118,15 @@ class DBUtils:
         data_list = self.cursor.fetchall()
         return data_list
 
-
     def close(self):
         # 关闭 SQL 链接
         self.cursor.close()
         self.conn.close()
 
+
 if __name__ == '__main__':
     # print(DBUtils().add_user("123","123","123"))
     # print(DBUtils().is_user_exist(username="admin"))
     # print(DBUtils().login(username="admin", passwd="admin1232"))
-    print(DBUtils().get_credits("admin"))
+    # print(DBUtils().get_credits("admin"))
     DBUtils().close()

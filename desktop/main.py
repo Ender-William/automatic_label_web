@@ -181,13 +181,7 @@ def start_detect(target_path, path_list):
         window['progressbar'].update(progress)
         index = index + 1
 
-
-if __name__ == '__main__':
-    login()
-    # Create the window
-    username = cfg['LOGIN_INFO']['USERNAME']
-    Window_Name = "Auto Label | User: " + username
-    window = sg.Window(Window_Name, operate_area_layout)
+def nomal():
     progress_bar = window['progressbar']
     weight = service.get_weights()
     window.read(timeout=10)
@@ -234,3 +228,12 @@ if __name__ == '__main__':
         # Output a message to the window
     # Finish up by removing from the screen
     window.close()
+
+
+if __name__ == '__main__':
+    login()
+    # Create the window
+    username = cfg['LOGIN_INFO']['USERNAME']
+    Window_Name = "Auto Label | User: " + username
+    window = sg.Window(Window_Name, operate_area_layout)
+    nomal()
