@@ -9,7 +9,7 @@ class DBUtils:
         host = "127.0.0.1"
         port = 3306
         user = 'root'
-        passwd = "02.05.09kd"
+        passwd = "passwd"
         charset = 'utf8'
         database = 'AutoLabel'
         self.conn = pymysql.connect(host=host, port=port,

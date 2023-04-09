@@ -83,6 +83,7 @@ def get_weight():
 
 
 if __name__ == '__main__':
+    # 导入你要加载的模型，需要修改数据库中对应的数据
     five_gesture = yolo_detectAPI.DetectAPI(weights='./weight/five_gesture.pt')
     five_gesture_en = yolo_detectAPI.DetectAPI(weights='./weight/five_gesture.pt')
     app.run()
