@@ -13,7 +13,7 @@ executing==1.2.0
 filelock==3.10.0
 Flask==2.2.3
 Flask-SQLAlchemy==3.0.3
-fonttools==4.39.2
+fonttools==4.43.0
 gast==0.3.3
 greenlet==2.0.2
 grpcio==1.51.3
